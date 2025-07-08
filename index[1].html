@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Tao NFT Interactive Gallery</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    #container {
+      position: relative;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    #canvas {
+      image-rendering: pixelated;
+      width: 1024px;
+      height: 1024px;
+    }
+    #hover-box {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid #fff;
+      pointer-events: none;
+      width: 4px;
+      height: 4px;
+      transform: scale(8);
+      transform-origin: top left;
+    }
+    #info {
+      margin-top: 15px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tao NFT Interactive Gallery</h1>
+  <div id="container">
+    <img src="tao_nft_canvas_full.png" id="canvas" alt="NFT Canvas">
+    <div id="hover-box"></div>
+  </div>
+  <div id="info">Наведи мышкой на картину...</div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const hoverBox = document.getElementById("hover-box");
+    const info = document.getElementById("info");
+    const gridSize = 256;
+    const pixelSize = 8;
+
+    canvas.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / pixelSize);
+      const y = Math.floor((e.clientY - rect.top) / pixelSize);
+
+      hoverBox.style.left = `${x * pixelSize}px`;
+      hoverBox.style.top = `${y * pixelSize}px`;
+      info.textContent = `Пиксель [${x}, ${y}] — Token ID: ${y * gridSize + x}`;
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      info.textContent = "Наведи мышкой на картину...";
+    });
+  </script>
+</body>
+</html>
