@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixel NFT Gallery</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: #fff; margin: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(64, 10px);
+      grid-template-rows: repeat(64, 10px);
+      gap: 1px;
+      justify-content: center;
+      padding: 20px;
+    }
+    .pixel {
+      width: 10px;
+      height: 10px;
+      background: #333;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .pixel:hover {
+      transform: scale(1.4);
+      z-index: 10;
+    }
+    .tooltip {
+      position: fixed;
+      background: #222;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center">🧩 Tao Pixel NFT Gallery</h2>
+  <div class="grid" id="grid"></div>
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+    const cid = "bafybeid6jhzt2pu7crbpwlrvu35q2oa7iwu5qtf343y6zxf3otkxwuga4i";
+    const metadataUrl = `https://ipfs.io/ipfs/${cid}/metadata.json`;
+
+    async function loadGallery() {
+      const res = await fetch(metadataUrl);
+      const data = await res.json();
+
+      const grid = document.getElementById("grid");
+      const tooltip = document.getElementById("tooltip");
+
+      const ownedPixels = new Set(data.map(d => `${d.attributes[0].value},${d.attributes[1].value}`));
+
+      for (let y = 0; y < 64; y++) {
+        for (let x = 0; x < 64; x++) {
+          const key = `${x},${y}`;
+          const pixel = document.createElement("div");
+          pixel.className = "pixel";
+
+          if (ownedPixels.has(key)) {
+            const item = data.find(d => d.attributes[0].value === x && d.attributes[1].value === y);
+            pixel.style.background = `url(https://ipfs.io/ipfs/${cid}/pixel_${x}_${y}.png)`;
+            pixel.style.backgroundSize = "cover";
+
+            pixel.addEventListener("mouseenter", (e) => {
+              tooltip.innerText = `${item.name}\nRarity: ${item.attributes[2].value}`;
+              tooltip.style.left = `${e.pageX + 10}px`;
+              tooltip.style.top = `${e.pageY + 10}px`;
+              tooltip.style.display = "block";
+            });
+            pixel.addEventListener("mousemove", (e) => {
+              tooltip.style.left = `${e.pageX + 10}px`;
+              tooltip.style.top = `${e.pageY + 10}px`;
+            });
+            pixel.addEventListener("mouseleave", () => {
+              tooltip.style.display = "none";
+            });
+          } else {
+            pixel.style.opacity = 0.2;
+          }
+
+          grid.appendChild(pixel);
+        }
+      }
+    }
+
+    loadGallery();
+  </script>
+</body>
+</html>
