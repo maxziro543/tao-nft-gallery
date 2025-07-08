@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Tao NFT Gallery (Demo)</title>
+  <style>
+    body {
+      background-color: #1c1c1c;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .canvas {
+      display: grid;
+      grid-template-columns: repeat(256, 8px);
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .pixel {
+      width: 8px;
+      height: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tao NFT Gallery (Demo)</h1>
+  <p>Полотно из NFT-пикселей, загруженных из IPFS</p>
+  <div class="canvas" id="canvas"></div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const baseUrl = 'https://ipfs.io/ipfs/bafkreigfcmvqfp55ettk4zw5r7w5ogkms36ynhxjhb7l3sqxf57qcyozey/';
+    const totalPixels = 256 * 256;
+
+    for (let i = 0; i < totalPixels; i++) {
+      const img = document.createElement('img');
+      img.className = 'pixel';
+      img.src = `${baseUrl}${i}.png`;
+      canvas.appendChild(img);
+    }
+  </script>
+</body>
+</html>
