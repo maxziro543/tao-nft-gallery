@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tao NFT Gallery</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #111;
+      color: #fff;
+      text-align: center;
+    }
+    .toolbar {
+      background: #222;
+      padding: 10px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+    }
+    .toolbar button {
+      margin: 0 5px;
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #canvas-container {
+      margin-top: 60px;
+      display: flex;
+      justify-content: center;
+    }
+    #canvas {
+      position: relative;
+    }
+    #canvas img {
+      width: 512px;
+      height: 512px;
+      display: block;
+    }
+    .pixel {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      box-sizing: border-box;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .pixel.available:hover {
+      border-color: white;
+    }
+    .pixel.rare {
+      box-shadow: 0 0 3px 1px #00f;
+    }
+    .pixel.epic {
+      box-shadow: 0 0 3px 2px #f0f;
+    }
+    .dimmed {
+      opacity: 0.1;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button onclick="filter('all')">Все</button>
+    <button onclick="filter('common')">Обычные</button>
+    <button onclick="filter('rare')">Редкие</button>
+    <button onclick="filter('epic')">Эпические</button>
+    <button onclick="filter('owned')">Мои пиксели</button>
+    <button onclick="connectWallet()">Подключить кошелек</button>
+  </div>
+
+  <div id="canvas-container">
+    <div id="canvas">
+      <img src="tao_nft_canvas_full.png" alt="NFT Canvas" />
+    </div>
+  </div>
+
+  <script>
+    const PIXEL_SIZE = 2;
+    const GRID_WIDTH = 256;
+    const GRID_HEIGHT = 256;
+    let currentFilter = 'all';
+    let wallet = null;
+    let status = {};
+
+    async function loadStatus() {
+      const res = await fetch('pixel_status.json');
+      status = await res.json();
+    }
+
+    async function init() {
+      await loadStatus();
+      const canvas = document.getElementById('canvas');
+
+      for (let y = 0; y < GRID_HEIGHT; y++) {
+        for (let x = 0; x < GRID_WIDTH; x++) {
+          const id = y * GRID_WIDTH + x;
+          const info = status[id] || { status: 'available', rarity: 'common', owner: null };
+
+          const div = document.createElement('div');
+          div.className = `pixel ${info.status === 'available' ? 'available' : 'taken'} ${info.rarity}`;
+          div.style.left = `${x * PIXEL_SIZE}px`;
+          div.style.top = `${y * PIXEL_SIZE}px`;
+
+          div.onclick = () => {
+            if (info.status === 'available' && (currentFilter === 'all' || currentFilter === info.rarity)) {
+              alert(`Пиксель ${id} выбран. Добавим покупку позже.`);
+            }
+          };
+
+          canvas.appendChild(div);
+        }
+      }
+
+      applyFilter();
+    }
+
+    function applyFilter() {
+      const all = document.querySelectorAll('.pixel');
+      all.forEach(p => {
+        p.classList.remove('dimmed');
+        const match = (
+          currentFilter === 'all' ||
+          (currentFilter === 'owned' && p.dataset.owner === wallet) ||
+          p.classList.contains(currentFilter)
+        );
+        if (!match) p.classList.add('dimmed');
+      });
+    }
+
+    function filter(type) {
+      currentFilter = type;
+      applyFilter();
+    }
+
+    function connectWallet() {
+      alert("Подключение Metamask эмулируется.");
+      wallet = "0xFAKEWALLET";
+      applyFilter();
+    }
+
+    init();
+  </script>
+</body>
+</html>
