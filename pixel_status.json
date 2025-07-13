@@ -1,7 +1,0 @@
-{
-  "0-0": { "rarity": "epic", "status": "sold" },
-  "1-0": { "rarity": "rare", "status": "available" },
-  "2-0": { "rarity": "common", "status": "available" },
-  "3-0": { "rarity": "rare", "status": "sold" },
-  "4-0": { "rarity": "epic", "status": "available" }
-}
