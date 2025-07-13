@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tao NFT Gallery</title>
+  <style>
+    body { margin: 0; background: #000; color: #fff; font-family: sans-serif; }
+    #wrapper { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+    #background {
+      width: 100%;
+      height: 100%;
+      background: url('https://gateway.pinata.cloud/ipfs/bafkreiehhhdw42a7saeshoiazhpq55246qq5hhflwvdfbrfzvum3nj3nqu') no-repeat center center;
+      background-size: contain;
+      image-rendering: pixelated;
+    }
+    #overlayCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 3;
+      image-rendering: pixelated;
+      width: 100%;
+      height: 100%;
+    }
+    .controls {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .controls button {
+      margin: 0 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button onclick="setFilter('all')">Все</button>
+    <button onclick="setFilter('common')">Обычные</button>
+    <button onclick="setFilter('rare')">Редкие</button>
+    <button onclick="setFilter('epic')">Эпические</button>
+  </div>
+  <div id="wrapper">
+    <div id="background"></div>
+    <canvas id="overlayCanvas" width="256" height="256"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('overlayCanvas');
+    const ctx = canvas.getContext('2d');
+    let filter = 'all';
+    let status = {};
+
+    fetch('pixel_status.json')
+      .then(res => res.json())
+      .then(data => {
+        status = data;
+        drawOverlay();
+      });
+
+    function setFilter(f) {
+      filter = f;
+      drawOverlay();
+    }
+
+    function drawOverlay() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < 256; y++) {
+        for (let x = 0; x < 256; x++) {
+          const i = y * 256 + x;
+          const px = status[i.toString()];
+          if (!px) continue;
+          if (filter !== 'all' && px.rarity !== filter) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(x, y, 1, 1);
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>
