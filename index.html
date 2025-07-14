@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Tao NFT Gallery</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #111;
+      color: white;
+    }
+    .toolbar {
+      background: #222;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+    }
+    #canvas-wrapper {
+      position: relative;
+      width: 512px;
+      height: 512px;
+      margin: 60px auto;
+    }
+    #background-img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .pixel {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      box-sizing: border-box;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .pixel:hover {
+      border-color: yellow;
+    }
+    .dim {
+      opacity: 0.1;
+      pointer-events: none;
+    }
+    .rare {
+      box-shadow: 0 0 2px 1px blue;
+    }
+    .epic {
+      box-shadow: 0 0 2px 1px magenta;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button onclick="applyFilter('all')">Все</button>
+    <button onclick="applyFilter('common')">Обычные</button>
+    <button onclick="applyFilter('rare')">Редкие</button>
+    <button onclick="applyFilter('epic')">Эпические</button>
+    <button onclick="applyFilter('mine')">Мои пиксели</button>
+    <button onclick="connectWallet()">Подключить кошелек</button>
+  </div>
+
+  <div id="canvas-wrapper">
+    <img id="background-img" src="tao_nft_canvas_full.png" />
+  </div>
+
+  <script>
+    const wrapper = document.getElementById('canvas-wrapper');
+    const PIXEL_SIZE = 2;
+    const WIDTH = 256;
+    const HEIGHT = 256;
+    let pixelData = {};
+    let wallet = null;
+    let currentFilter = 'all';
+
+    async function fetchPixelData() {
+      const res = await fetch('pixel_status.json');
+      pixelData = await res.json();
+    }
+
+    function createPixel(x, y, data) {
+      const div = document.createElement('div');
+      div.classList.add('pixel');
+      div.style.left = (x * PIXEL_SIZE) + 'px';
+      div.style.top = (y * PIXEL_SIZE) + 'px';
+
+      const rarity = data.rarity || 'common';
+      const owner = data.owner || null;
+      const status = data.status || 'available';
+
+      if (rarity !== 'common') div.classList.add(rarity);
+      if (status !== 'available') div.classList.add('taken');
+
+      div.dataset.rarity = rarity;
+      div.dataset.owner = owner;
+      div.dataset.status = status;
+
+      div.onclick = () => {
+        if (div.classList.contains('dim')) return;
+        alert(`Пиксель (${x}, ${y})\nРаритет: ${rarity}\n[Купить]`);
+      };
+
+      wrapper.appendChild(div);
+    }
+
+    function applyFilter(type) {
+      currentFilter = type;
+      document.querySelectorAll('.pixel').forEach(pixel => {
+        const r = pixel.dataset.rarity;
+        const o = pixel.dataset.owner;
+        if (
+          type === 'all' ||
+          (type === 'mine' && wallet && o === wallet) ||
+          r === type
+        ) {
+          pixel.classList.remove('dim');
+        } else {
+          pixel.classList.add('dim');
+        }
+      });
+    }
+
+    function connectWallet() {
+      wallet = "0xFAKE";
+      applyFilter(currentFilter);
+      alert("Кошелек подключен");
+    }
+
+    async function init() {
+      await fetchPixelData();
+      for (let y = 0; y < HEIGHT; y++) {
+        for (let x = 0; x < WIDTH; x++) {
+          const id = y * WIDTH + x;
+          const data = pixelData[id] || {};
+          createPixel(x, y, data);
+        }
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
